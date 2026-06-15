@@ -1,0 +1,82 @@
+name: Predictive Maintenance ML Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  data-registration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          pip install             pandas==2.1.4             scikit-learn==1.2.2             xgboost==2.0.3             imbalanced-learn==0.10.1             huggingface_hub==0.23.0             datasets==2.19.0
+      - name: Step 1 — Data Registration
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python predictive_maintenance/steps/01_data_registration.py
+
+  data-preparation:
+    runs-on: ubuntu-latest
+    needs: data-registration
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          pip install             pandas==2.1.4             scikit-learn==1.2.2             xgboost==2.0.3             imbalanced-learn==0.10.1             huggingface_hub==0.23.0             datasets==2.19.0
+      - name: Step 2 — Data Preparation
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python predictive_maintenance/steps/02_data_preparation.py
+
+  model-training:
+    runs-on: ubuntu-latest
+    needs: data-preparation
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          pip install             pandas==2.1.4             scikit-learn==1.2.2             xgboost==2.0.3             imbalanced-learn==0.10.1             huggingface_hub==0.23.0             datasets==2.19.0
+      - name: Step 3 — Model Building
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python predictive_maintenance/steps/03_model_building.py
+      - name: Step 4 — Register Model
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python predictive_maintenance/steps/04_register_model.py
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: model-training
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          pip install             huggingface_hub==0.23.0
+      - name: Step 5 — Deploy to HF Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python predictive_maintenance/steps/05_deploy.py

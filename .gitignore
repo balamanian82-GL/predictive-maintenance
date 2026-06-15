@@ -1,0 +1,11 @@
+# Colab system files
+.config/
+sample_data/
+
+# MLflow artifacts — tracked locally in notebook only
+mlruns/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
